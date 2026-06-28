@@ -220,6 +220,7 @@ const MobileNotebookSelectSheet = ({
 
 export const EditorPane = ({
   memo,
+  mobileDefaultEditMemoId,
   isTrashView,
   notebooks,
   isLoading,
@@ -233,10 +234,12 @@ export const EditorPane = ({
   onDeleted,
   onPermanentDeleted,
   onRestored,
+  onMobileDefaultEditConsumed,
   searchFocusToken,
   replaceFocusToken,
 }: {
   memo: MemoDetail | null;
+  mobileDefaultEditMemoId: string | null;
   isTrashView: boolean;
   notebooks: Notebook[];
   isLoading: boolean;
@@ -250,6 +253,7 @@ export const EditorPane = ({
   onDeleted: (memoId: string) => Promise<void>;
   onPermanentDeleted: (memoId: string) => Promise<void>;
   onRestored: (memoId: string) => Promise<void>;
+  onMobileDefaultEditConsumed: () => void;
   searchFocusToken: number;
   replaceFocusToken: number;
 }) => {
@@ -299,6 +303,13 @@ export const EditorPane = ({
   useEffect(() => {
     setIsMobileEditing(false);
   }, [memo?.id]);
+
+  useEffect(() => {
+    if (memo?.id && memo.id === mobileDefaultEditMemoId) {
+      setIsMobileEditing(true);
+      onMobileDefaultEditConsumed();
+    }
+  }, [memo?.id, mobileDefaultEditMemoId, onMobileDefaultEditConsumed]);
 
   const insertImageFiles = useCallback((files: File[]) => {
     const currentMemo = memoRef.current;

@@ -455,6 +455,7 @@ export const WorkspaceApp = ({
   const [memoView, setMemoView] = useState<MemoView>("notebook");
   const [selectedNotebookId, setSelectedNotebookId] = useState<string | null>(null);
   const [selectedMemoId, setSelectedMemoId] = useState<string | null>(null);
+  const [createdMemoEditId, setCreatedMemoEditId] = useState<string | null>(null);
   const [selectedMemoIds, setSelectedMemoIds] = useState<Set<string>>(new Set());
   const [memoSelectionMode, setMemoSelectionMode] = useState(false);
   const [memoDeleteConfirmation, setMemoDeleteConfirmation] = useState<MemoDeleteConfirmation | null>(null);
@@ -873,6 +874,7 @@ export const WorkspaceApp = ({
       ]);
       queryClient.setQueryData(["memo", data.memo.id], { memo: data.memo });
       setRightView("editor");
+      setCreatedMemoEditId(data.memo.id);
       setSelectedMemoId(data.memo.id);
       setActivePane("editor");
     },
@@ -1084,6 +1086,10 @@ export const WorkspaceApp = ({
       tags: template?.tags ?? [],
     });
   };
+
+  const handleMobileDefaultEditConsumed = useCallback(() => {
+    setCreatedMemoEditId(null);
+  }, []);
 
   const handleMoveNotebook = (
     notebookId: string,
@@ -1804,11 +1810,13 @@ export const WorkspaceApp = ({
                 setSelectedNotebookId(null);
                 setMobileBottomNavActive("home");
                 clearMemoSelection();
+                setCreatedMemoEditId(null);
                 setSelectedMemoId(null);
                 setActivePane("memos");
               }}
               onOpenMemo={(memoId) => {
                 setRightView("editor");
+                setCreatedMemoEditId(null);
                 setSelectedMemoId(memoId);
                 setActivePane("editor");
               }}
@@ -1881,6 +1889,7 @@ export const WorkspaceApp = ({
                 ) : (
                   <EditorPane
                     memo={selectedMemo}
+                    mobileDefaultEditMemoId={createdMemoEditId}
                     isTrashView={memoView === "trash"}
                     notebooks={notebooks}
                     isLoading={memoQuery.isLoading}
@@ -1892,11 +1901,13 @@ export const WorkspaceApp = ({
                     onBackToList={() => setActivePane("memos")}
                     onOpenNextMemo={() => {
                       if (nextMemoId) {
+                        setCreatedMemoEditId(null);
                         setSelectedMemoId(nextMemoId);
                       }
                     }}
                     onOpenPreviousMemo={() => {
                       if (previousMemoId) {
+                        setCreatedMemoEditId(null);
                         setSelectedMemoId(previousMemoId);
                       }
                     }}
@@ -1916,6 +1927,7 @@ export const WorkspaceApp = ({
                     onRestored={async (memoId) => {
                       await restoreMemoMutation.mutateAsync(memoId);
                     }}
+                    onMobileDefaultEditConsumed={handleMobileDefaultEditConsumed}
                   />
                 )}
               </Suspense>
