@@ -4,6 +4,8 @@ import {
   ChevronLeft,
   Plus,
   LayoutList,
+  BookPlus,
+  ArrowDownWideNarrow,
   Notebook as NotebookIcon,
   Tags,
   Archive,
@@ -14,7 +16,7 @@ import {
   AlertTriangle,
   RefreshCw,
   CheckCircle2,
-  Settings,
+  CircleUserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -26,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotebookTreeItem } from "./NotebookTreeItem";
-import { GitHubRepositoryLink } from "./GitHubRepositoryLink";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { Notebook, AuthUser } from "@edgeever/shared";
@@ -50,16 +51,23 @@ const SidebarNavButton = ({
 }) => (
   <button
     className={cn(
-      "flex h-9 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition-all duration-200",
+      "flex h-9 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium leading-none transition-all duration-200",
       active ? "bg-emerald-50 text-emerald-800" : "text-slate-700 hover:bg-slate-50 hover:text-slate-950"
     )}
     type="button"
     aria-current={active ? "page" : undefined}
     onClick={onClick}
   >
-    <span className="shrink-0">{icon}</span>
+    <span className="flex h-4 w-4 shrink-0 items-center justify-center">{icon}</span>
     <span className="min-w-0 flex-1 truncate">{label}</span>
   </button>
+);
+
+const SidebarSectionLabel = ({ icon, label }: { icon: ReactNode; label: string }) => (
+  <div className="flex h-9 items-center gap-3 px-3 text-sm font-medium leading-none text-slate-600">
+    <span className="flex h-4 w-4 shrink-0 items-center justify-center">{icon}</span>
+    <span className="min-w-0 flex-1 truncate">{label}</span>
+  </div>
 );
 
 const getSyncStatusLabel = (summary: SyncQueueSummary, isOnline: boolean, isSyncing: boolean) => {
@@ -284,7 +292,7 @@ export const NotebookPane = ({
           <Button className="lg:hidden" size="icon" variant="ghost" title="返回笔记列表" aria-label="返回笔记列表" onClick={onBackToList}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" title="新建笔记本" aria-label="新建笔记本" onClick={() => onCreateNotebook(null)}>
+          <Button className="lg:hidden" size="icon" variant="ghost" title="新建笔记本" aria-label="新建笔记本" onClick={() => onCreateNotebook(null)}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -326,20 +334,27 @@ export const NotebookPane = ({
           />
         </nav>
 
-        <div className="mb-2 flex items-center justify-between gap-2 px-2 text-xs font-semibold uppercase text-slate-500">
-          <span className="inline-flex min-w-0 items-center gap-2">
-            <NotebookIcon className="h-4 w-4" />
-            笔记本
-          </span>
-          <button
-            className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500 transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-800 lg:hidden"
-            type="button"
-            title="新建笔记本"
-            aria-label="新建笔记本"
-            onClick={() => onCreateNotebook(null)}
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </button>
+        <div className="group mb-2 flex items-center justify-between gap-2">
+          <SidebarSectionLabel icon={<NotebookIcon className="h-4 w-4" />} label="笔记本" />
+          <div className="flex items-center gap-1 opacity-100 transition-opacity duration-200 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+            <button
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500 transition-colors duration-200 hover:bg-emerald-50 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
+              type="button"
+              title="新建笔记本"
+              aria-label="新建笔记本"
+              onClick={() => onCreateNotebook(null)}
+            >
+              <BookPlus className="h-3.5 w-3.5" />
+            </button>
+            <span
+              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500"
+              title="拖拽笔记本排序"
+              role="img"
+              aria-label="拖拽笔记本排序"
+            >
+              <ArrowDownWideNarrow className="h-3.5 w-3.5" />
+            </span>
+          </div>
         </div>
 
         {isLoading ? (
@@ -378,24 +393,17 @@ export const NotebookPane = ({
         </nav>
       </div>
 
-      <footer className="border-t border-slate-200 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 bg-white/70 backdrop-blur-sm">
-        <div>
+      <footer className="border-t border-slate-200 bg-white/70 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-sm">
+        <div className="flex items-center">
           <button
             onClick={onOpenSettings}
-            className="flex w-full items-center gap-3 rounded-lg border border-slate-200 bg-white p-2 text-left hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
+            className="flex h-9 w-9 items-center justify-center rounded-md text-slate-600 transition-colors duration-200 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70"
+            type="button"
+            title="个人中心"
+            aria-label="个人中心"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-semibold text-white uppercase shadow-[0_2px_8px_rgb(var(--brand-green-rgb)/0.15)]">
-              {user?.username?.charAt(0) ?? "L"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-slate-800 leading-tight">{user?.username ?? "本地用户"}</div>
-              <div className="truncate text-[10px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">{isOnline ? "在线" : "离线"}</div>
-            </div>
-            <Settings className="h-4 w-4 shrink-0 text-slate-400" />
+            <CircleUserRound className="h-5 w-5" />
           </button>
-          <div className="mt-2 flex items-center justify-start">
-            <GitHubRepositoryLink className="h-8 w-8 justify-center rounded-md text-slate-500 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/70" />
-          </div>
         </div>
       </footer>
     </div>
