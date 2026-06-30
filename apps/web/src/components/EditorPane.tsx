@@ -68,10 +68,13 @@ type NoteSearchMatch = {
   to: number;
 };
 
+const isEditorReady = (editor: Editor | null | undefined): editor is Editor =>
+  Boolean(editor && !editor.isDestroyed && (editor as { extensionManager?: unknown }).extensionManager);
+
 const getEditorSearchMatches = (editor: Editor | null, query: string): NoteSearchMatch[] => {
   const needle = query.trim().toLocaleLowerCase();
 
-  if (!editor || needle.length === 0) {
+  if (!isEditorReady(editor) || needle.length === 0) {
     return [];
   }
 
@@ -314,7 +317,10 @@ export const EditorPane = ({
       setIsMobileEditing(true);
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          editorRef.current?.commands.focus("end");
+          const currentEditor = editorRef.current;
+          if (isEditorReady(currentEditor)) {
+            currentEditor.commands.focus("end");
+          }
         });
       });
       onMobileDefaultEditConsumed();
@@ -344,12 +350,13 @@ export const EditorPane = ({
           const { resource } = await api.uploadMemoResource(targetMemoId, uploadFile);
           void queryClient.invalidateQueries({ queryKey: ["resources"] });
 
-          if (memoRef.current?.id !== targetMemoId || !editorRef.current) {
+          const activeEditor = editorRef.current;
+          if (memoRef.current?.id !== targetMemoId || !isEditorReady(activeEditor)) {
             setImageUploadState("idle");
             return;
           }
 
-          editorRef.current
+          activeEditor
             .chain()
             .focus()
             .setImage({
@@ -392,13 +399,14 @@ export const EditorPane = ({
           const { resource } = await api.uploadMemoResource(targetMemoId, uploadFile);
           void queryClient.invalidateQueries({ queryKey: ["resources"] });
 
-          if (memoRef.current?.id !== targetMemoId || !editorRef.current) {
+          const activeEditor = editorRef.current;
+          if (memoRef.current?.id !== targetMemoId || !isEditorReady(activeEditor)) {
             setImageUploadState("idle");
             return;
           }
 
           if (resource.kind === "image") {
-            editorRef.current
+            activeEditor
               .chain()
               .focus()
               .setImage({
@@ -408,7 +416,7 @@ export const EditorPane = ({
               })
               .run();
           } else {
-            editorRef.current
+            activeEditor
               .chain()
               .focus()
               .insertContent({
@@ -491,7 +499,7 @@ export const EditorPane = ({
     (index: number) => {
       const match = noteSearchMatches[index];
 
-      if (!editor || !match) {
+      if (!isEditorReady(editor) || !match) {
         return;
       }
 
@@ -521,7 +529,9 @@ export const EditorPane = ({
 
   const closeNoteSearch = useCallback(() => {
     setNoteSearchOpen(false);
-    editor?.commands.focus();
+    if (isEditorReady(editor)) {
+      editor.commands.focus();
+    }
   }, [editor]);
 
   const moveNoteSearchMatch = useCallback(
@@ -564,7 +574,7 @@ export const EditorPane = ({
   }, [noteSearchMatches, noteSearchOpen, selectNoteSearchMatch]);
 
   const replaceAllNoteSearchMatches = useCallback(() => {
-    if (!editor || effectiveReadOnly || noteSearchMatches.length === 0) {
+    if (!isEditorReady(editor) || effectiveReadOnly || noteSearchMatches.length === 0) {
       return;
     }
 
@@ -586,7 +596,7 @@ export const EditorPane = ({
   }, [editor, effectiveReadOnly, noteSearchMatches, noteSearchReplacement]);
 
   useEffect(() => {
-    if (!editor) {
+    if (!isEditorReady(editor)) {
       return;
     }
 
@@ -605,7 +615,7 @@ export const EditorPane = ({
       const currentMemo = memoRef.current;
       const currentEditor = editorRef.current;
 
-      if (!currentMemo || currentMemo.isDeleted || !currentEditor) {
+      if (!currentMemo || currentMemo.isDeleted || !isEditorReady(currentEditor)) {
         return;
       }
 
@@ -634,7 +644,7 @@ export const EditorPane = ({
 
   const currentSnapshot = useCallback(() => {
     const currentEditor = editorRef.current;
-    if (!currentEditor) {
+    if (!isEditorReady(currentEditor)) {
       return null;
     }
 
@@ -657,7 +667,9 @@ export const EditorPane = ({
       setTitle("");
       setTagsText("");
       setSaveState("idle");
-      currentEditor?.commands.clearContent();
+      if (isEditorReady(currentEditor)) {
+        currentEditor.commands.clearContent();
+      }
       return;
     }
 
@@ -696,7 +708,7 @@ export const EditorPane = ({
       setTitle(nextTitle);
       setTagsText(nextTagsText);
 
-      if (currentEditor) {
+      if (isEditorReady(currentEditor)) {
         currentEditor.commands.setContent(nextContent);
       }
 
@@ -711,11 +723,13 @@ export const EditorPane = ({
   }, [isTrashView, memo, editor]);
 
   useEffect(() => {
-    editor?.setEditable(Boolean(memo && !effectiveReadOnly));
+    if (isEditorReady(editor)) {
+      editor.setEditable(Boolean(memo && !effectiveReadOnly));
+    }
   }, [editor, effectiveReadOnly, memo]);
 
   useEffect(() => {
-    if (!editor || !memo) {
+    if (!isEditorReady(editor) || !memo) {
       return;
     }
 
@@ -738,7 +752,7 @@ export const EditorPane = ({
       const currentMemo = memoRef.current;
       const currentEditor = editorRef.current;
 
-      if (!currentMemo || !currentEditor) {
+      if (!currentMemo || !isEditorReady(currentEditor)) {
         throw new Error("No memo selected");
       }
 
@@ -1371,7 +1385,7 @@ export const EditorPane = ({
 
       {historyOpen && (
         <RevisionHistoryDialog
-          currentMarkdown={editor ? docToMarkdown(editor.getJSON() as TiptapDoc) : memo.contentMarkdown}
+          currentMarkdown={isEditorReady(editor) ? docToMarkdown(editor.getJSON() as TiptapDoc) : memo.contentMarkdown}
           memo={memo}
           onClose={() => setHistoryOpen(false)}
           onRestored={async (restoredMemo) => {

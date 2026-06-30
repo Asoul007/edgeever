@@ -173,17 +173,22 @@ export const MEMO_FILTER_OPTIONS: Array<{ value: MemoFilterMode; label: string }
 export const getMemoTitle = (title: string | null | undefined) => title?.trim() || DEFAULT_MEMO_TITLE;
 
 export const getActiveBlockValue = (editor: any): string => {
-  if (!editor) {
+  if (!editor || editor.isDestroyed || !editor.extensionManager) {
     return "paragraph";
   }
-  if (editor.isActive("heading", { level: 1 })) {
-    return "heading-1";
-  }
-  if (editor.isActive("heading", { level: 2 })) {
-    return "heading-2";
-  }
-  if (editor.isActive("heading", { level: 3 })) {
-    return "heading-3";
+
+  try {
+    if (editor.isActive("heading", { level: 1 })) {
+      return "heading-1";
+    }
+    if (editor.isActive("heading", { level: 2 })) {
+      return "heading-2";
+    }
+    if (editor.isActive("heading", { level: 3 })) {
+      return "heading-3";
+    }
+  } catch {
+    return "paragraph";
   }
   return "paragraph";
 };

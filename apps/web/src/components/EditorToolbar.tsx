@@ -51,22 +51,47 @@ const EditorToolbarButton = ({
 
 const ToolbarDivider = () => <div className="h-6 w-px shrink-0 bg-slate-200" />;
 
-export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; readOnly: boolean }) => {
-  const disabled = readOnly || !editor;
-  const blockValue = getActiveBlockValue(editor);
+const isToolbarEditorReady = (editor: Editor | null): editor is Editor =>
+  Boolean(editor && !editor.isDestroyed && (editor as { extensionManager?: unknown }).extensionManager);
 
-  const canRun = (command: (editor: Editor) => boolean) => {
-    if (!editor || readOnly) {
+export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; readOnly: boolean }) => {
+  const editorReady = isToolbarEditorReady(editor);
+  const disabled = readOnly || !editorReady;
+  const blockValue = getActiveBlockValue(editor);
+  const isActive = (name: string) => {
+    if (!editorReady) {
       return false;
     }
-    return command(editor);
+
+    try {
+      return editor.isActive(name);
+    } catch {
+      return false;
+    }
+  };
+
+  const canRun = (command: (editor: Editor) => boolean) => {
+    if (!isToolbarEditorReady(editor) || readOnly) {
+      return false;
+    }
+
+    try {
+      return command(editor);
+    } catch {
+      return false;
+    }
   };
 
   const run = (command: (editor: Editor) => void) => {
-    if (!editor || readOnly) {
+    if (!isToolbarEditorReady(editor) || readOnly) {
       return;
     }
-    command(editor);
+
+    try {
+      command(editor);
+    } catch {
+      return;
+    }
   };
 
   const setBlock = (value: string) => {
@@ -138,7 +163,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         <ToolbarDivider />
         <EditorToolbarButton
           title="加粗"
-          active={Boolean(editor?.isActive("bold"))}
+          active={isActive("bold")}
           disabled={!canRun((current) => current.can().chain().focus().toggleBold().run())}
           onClick={() => run((current) => current.chain().focus().toggleBold().run())}
         >
@@ -146,7 +171,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="斜体"
-          active={Boolean(editor?.isActive("italic"))}
+          active={isActive("italic")}
           disabled={!canRun((current) => current.can().chain().focus().toggleItalic().run())}
           onClick={() => run((current) => current.chain().focus().toggleItalic().run())}
         >
@@ -154,7 +179,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="删除线"
-          active={Boolean(editor?.isActive("strike"))}
+          active={isActive("strike")}
           disabled={!canRun((current) => current.can().chain().focus().toggleStrike().run())}
           onClick={() => run((current) => current.chain().focus().toggleStrike().run())}
         >
@@ -162,7 +187,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="行内代码"
-          active={Boolean(editor?.isActive("code"))}
+          active={isActive("code")}
           disabled={!canRun((current) => current.can().chain().focus().toggleCode().run())}
           onClick={() => run((current) => current.chain().focus().toggleCode().run())}
         >
@@ -172,7 +197,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         <ToolbarDivider />
         <EditorToolbarButton
           title="无序列表"
-          active={Boolean(editor?.isActive("bulletList"))}
+          active={isActive("bulletList")}
           disabled={disabled}
           onClick={() => run((current) => current.chain().focus().toggleBulletList().run())}
         >
@@ -180,7 +205,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="有序列表"
-          active={Boolean(editor?.isActive("orderedList"))}
+          active={isActive("orderedList")}
           disabled={disabled}
           onClick={() => run((current) => current.chain().focus().toggleOrderedList().run())}
         >
@@ -188,7 +213,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="引用"
-          active={Boolean(editor?.isActive("blockquote"))}
+          active={isActive("blockquote")}
           disabled={disabled}
           onClick={() => run((current) => current.chain().focus().toggleBlockquote().run())}
         >
@@ -196,7 +221,7 @@ export const EditorToolbar = ({ editor, readOnly }: { editor: Editor | null; rea
         </EditorToolbarButton>
         <EditorToolbarButton
           title="代码块"
-          active={Boolean(editor?.isActive("codeBlock"))}
+          active={isActive("codeBlock")}
           disabled={disabled}
           onClick={() => run((current) => current.chain().focus().toggleCodeBlock().run())}
         >
