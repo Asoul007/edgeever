@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Copy, Image, KeyRound, LogOut, Plus, ShieldCheck, Trash2, User } from "lucide-react";
+import { ChevronLeft, Copy, HelpCircle, Image, KeyRound, LogOut, Plus, ShieldCheck, Trash2, UploadCloud, User } from "lucide-react";
 import type { ApiToken, AuthUser } from "@edgeever/shared";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,6 +125,26 @@ const PreferenceCard = ({ imageCompressionEnabled, onImageCompressionChange }: P
         </div>
       </div>
     </CardContent>
+  </Card>
+);
+
+const EvernoteImportGuideCard = () => (
+  <Card className="hidden w-full min-w-0 overflow-hidden shadow-none lg:block">
+    <CardHeader className="p-4">
+      <CardTitle className="flex items-center gap-2 text-sm">
+        <UploadCloud className="h-4 w-4 text-emerald-700" />
+        导入印象笔记
+        <Button size="sm" variant="outline" className="h-7 bg-white px-2.5 text-xs" type="button" asChild>
+          <a href="/evernote-migration" target="_blank" rel="noreferrer">
+            <HelpCircle className="h-3.5 w-3.5" />
+            操作指引
+          </a>
+        </Button>
+      </CardTitle>
+      <CardDescription className="text-xs leading-4">
+        查看从印象笔记迁移到 EdgeEver 的步骤，推荐使用 MCP 与 AI Agent 批量导入。
+      </CardDescription>
+    </CardHeader>
   </Card>
 );
 
@@ -646,6 +666,7 @@ export const SettingsPane = ({
             imageCompressionEnabled={imageCompressionEnabled}
             onImageCompressionChange={onImageCompressionChange}
           />
+          <EvernoteImportGuideCard />
           <TokenCard
             name={name}
             onNameChange={setName}
