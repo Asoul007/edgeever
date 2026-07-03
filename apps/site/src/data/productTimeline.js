@@ -42,9 +42,9 @@ export const productTimeline = [
     date: "2026-06-28",
     title: "工作区重构与品牌视觉统一",
     summary:
-      "Web 端从单体 App 结构重构为模块化组件，设置页和资源页变成工作区视图；同时引入 shadcn/ui、Evernote green 变量、移动端交互与性能拆包。",
+      "Web 端从单体 App 结构重构为模块化组件，设置页和资源页变成工作区视图；同时引入 shadcn/ui、EdgeEver 品牌色变量、移动端交互与性能拆包。",
     commits: ["b201d7d", "c0868dc", "e7ab278", "fa139b9", "2a0978a"],
-    highlights: ["App.tsx 模块化", "设置 / 资源全页工作区", "Evernote green brand variables", "初始 bundle 拆分", "笔记本排序选项"],
+    highlights: ["App.tsx 模块化", "设置 / 资源全页工作区", "EdgeEver brand variables", "初始 bundle 拆分", "笔记本排序选项"],
   },
   {
     date: "2026-06-27",
