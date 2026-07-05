@@ -9,6 +9,10 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: "https://edgeever.org",
+  server: {
+    port: 4321,
+    host: "127.0.0.1"
+  },
   integrations: [mdx(), sitemap(), icon(), react()],
   vite: {
     plugins: [tailwindcss()],
