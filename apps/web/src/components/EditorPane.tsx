@@ -467,14 +467,6 @@ type RichEditorPaneProps = EditorPaneProps & {
   onRequestMobileNativeEdit?: () => void;
 };
 
-const openStandaloneMobileEditor = (memoId: string) => {
-  const params = new URLSearchParams({
-    memoId,
-    returnTo: "/",
-  });
-  window.location.href = `/mobile-edit.html#${params.toString()}`;
-};
-
 const MobileNativeEditorPane = ({
   memo,
   notebooks,
@@ -954,12 +946,6 @@ export const EditorPane = (props: EditorPaneProps) => {
   );
 
   useEffect(() => {
-    if (isMobileViewport && mobileDefaultEditRequested && props.memo?.id) {
-      openStandaloneMobileEditor(props.memo.id);
-    }
-  }, [isMobileViewport, mobileDefaultEditRequested, props.memo?.id]);
-
-  useEffect(() => {
     const mediaQuery = window.matchMedia(MOBILE_EDITOR_QUERY);
     const updateMobileViewport = () => setIsMobileViewport(mediaQuery.matches);
 
@@ -975,9 +961,10 @@ export const EditorPane = (props: EditorPaneProps) => {
 
   if (mobileNativeEditingActive) {
     return (
-      <div className="flex h-full min-h-0 items-center justify-center bg-white text-sm font-medium text-slate-400">
-        打开编辑器
-      </div>
+      <MobileNativeEditorPane
+        {...props}
+        onExitMobileNativeEdit={() => setMobileNativeEditMemoId(null)}
+      />
     );
   }
 
@@ -988,7 +975,6 @@ export const EditorPane = (props: EditorPaneProps) => {
       onRequestMobileNativeEdit={() => {
         if (props.memo?.id && !readOnly) {
           setMobileNativeEditMemoId(props.memo.id);
-          openStandaloneMobileEditor(props.memo.id);
         }
       }}
     />
