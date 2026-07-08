@@ -4203,19 +4203,51 @@ const NotebookPicker = ({
   notebooks: Notebook[];
   onChange: (notebookId: string) => void;
   selectedNotebookId: string;
-}) => (
-  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    {flattenNotebooks(notebooks).map(({ depth, notebook }) => (
-      <NotebookPill
-        active={selectedNotebookId === notebook.id}
-        key={notebook.id}
-        label={`${"  ".repeat(depth)}${depth > 0 ? "└ " : ""}${notebook.name}`}
-        memoCount={notebook.memoCount}
-        onPress={() => onChange(notebook.id)}
-      />
-    ))}
-  </ScrollView>
-);
+}) => {
+  const [searchText, setSearchText] = useState("");
+  const notebookOptions = flattenNotebooks(notebooks);
+  const visibleNotebookOptions = filterNotebookOptions(notebookOptions, searchText);
+
+  return (
+    <View style={styles.notebookPicker}>
+      <View style={styles.searchBox}>
+        <Search color="#64748b" size={18} />
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          onChangeText={setSearchText}
+          placeholder="搜索笔记本"
+          placeholderTextColor="#94a3b8"
+          style={styles.searchInput}
+          value={searchText}
+        />
+        {searchText ? (
+          <Pressable onPress={() => setSearchText("")}>
+            <X color="#64748b" size={18} />
+          </Pressable>
+        ) : null}
+      </View>
+      {visibleNotebookOptions.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {visibleNotebookOptions.map(({ depth, notebook }) => (
+            <NotebookPill
+              active={selectedNotebookId === notebook.id}
+              key={notebook.id}
+              label={`${"  ".repeat(depth)}${depth > 0 ? "└ " : ""}${notebook.name}`}
+              memoCount={notebook.memoCount}
+              onPress={() => onChange(notebook.id)}
+            />
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyInlinePanel}>
+          <Folder color="#94a3b8" size={24} />
+          <Text style={styles.mutedText}>没有匹配的笔记本</Text>
+        </View>
+      )}
+    </View>
+  );
+};
 
 const NotebookPill = ({
   active,
@@ -5819,6 +5851,9 @@ const styles = StyleSheet.create({
   },
   parentSelectList: {
     flexGrow: 0,
+  },
+  notebookPicker: {
+    gap: 10,
   },
   tagManageRow: {
     alignItems: "center",
