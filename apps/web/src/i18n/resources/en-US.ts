@@ -534,7 +534,7 @@ export const enUS = {
     legacyConfigCannotCopy: "MCP config cannot be copied for old tokens",
     deleteToken: "Delete token",
     description: "Allow AI Agents to read and organize your notes.",
-    namePlaceholder: "Token purpose, e.g. MCP Agent",
+    namePlaceholder: "Token name, e.g. Codex or Claude Code",
     createToken: "Generate token",
     activeTokens: "Token list",
     deleteConfirmTitle: "Delete token “{{name}}”?",

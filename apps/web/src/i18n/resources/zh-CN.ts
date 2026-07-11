@@ -534,7 +534,7 @@ export const zhCN = {
     legacyConfigCannotCopy: "旧 Token 无法复制 MCP 配置",
     deleteToken: "删除 Token",
     description: "让 AI Agent 可以读取和整理你的笔记。",
-    namePlaceholder: "Token 用途，例如：MCP Agent",
+    namePlaceholder: "Token 名称，例如：Codex 或 Claude Code",
     createToken: "生成 Token",
     activeTokens: "Token 列表",
     deleteConfirmTitle: "确定要删除 Token「{{name}}」吗？",
