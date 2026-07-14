@@ -37,7 +37,7 @@ export const zhCN = {
   },
   login: {
     title: "登录 EdgeEver",
-    subtitle: "自托管笔记工作区",
+    subtitle: "你的自托管笔记工作区",
     username: "账号",
     password: "密码",
     submitting: "安全登录中...",

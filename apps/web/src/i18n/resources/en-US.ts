@@ -37,7 +37,7 @@ export const enUS = {
   },
   login: {
     title: "Sign in to EdgeEver",
-    subtitle: "Self-hosted notes workspace",
+    subtitle: "Your personal self-hosted notes workspace",
     username: "Username",
     password: "Password",
     submitting: "Signing in...",
