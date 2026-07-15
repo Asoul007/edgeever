@@ -15,16 +15,14 @@ if (!["doctor", "setup"].includes(command)) {
 
 const envPath = resolve(".env.local");
 const envExamplePath = resolve(".env.local.example");
-const localWrangler = resolve(
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "wrangler.cmd" : "wrangler",
-);
-const wrangler = existsSync(localWrangler)
-  ? localWrangler
-  : process.platform === "win32"
-    ? "wrangler.cmd"
-    : "wrangler";
+const localWrangler = process.platform === "win32"
+  ? ["wrangler.exe", "wrangler.cmd"]
+      .map((name) => resolve("node_modules", ".bin", name))
+      .find((path) => existsSync(path))
+  : resolve("node_modules", ".bin", "wrangler");
+const wrangler = localWrangler && existsSync(localWrangler) ? localWrangler : "wrangler";
+const wranglerNeedsShell =
+  process.platform === "win32" && !wrangler.toLowerCase().endsWith(".exe");
 
 const parseEnv = (content) => {
   const values = new Map();
@@ -109,7 +107,7 @@ const run = (executable, args, options = {}) =>
     ...options,
   });
 
-const runWrangler = (args) => run(wrangler, args);
+const runWrangler = (args) => run(wrangler, args, { shell: wranglerNeedsShell });
 
 const check = (label, passed, detail = "") => {
   const status = passed ? "ok" : "fail";

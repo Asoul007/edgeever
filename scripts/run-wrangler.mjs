@@ -210,30 +210,28 @@ if (isDeployCommand && Object.keys(authSecrets).length > 0 && !hasSecretsFileArg
   finalWranglerArgs.push("--secrets-file", generatedSecretsPath);
 }
 
-const localWrangler = resolve(
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "wrangler.cmd" : "wrangler",
-);
-const executable = existsSync(localWrangler)
-  ? localWrangler
-  : process.platform === "win32"
-    ? "wrangler.cmd"
-    : "wrangler";
-const result = spawnSync(executable, ["--config", configPath, ...finalWranglerArgs], {
+const localWrangler = process.platform === "win32"
+  ? ["wrangler.exe", "wrangler.cmd"]
+      .map((name) => resolve("node_modules", ".bin", name))
+      .find((path) => existsSync(path))
+  : resolve("node_modules", ".bin", "wrangler");
+const executable = localWrangler && existsSync(localWrangler) ? localWrangler : "wrangler";
+const executableNeedsShell =
+  process.platform === "win32" && !executable.toLowerCase().endsWith(".exe");
+const result = spawnSync(executable, [...finalWranglerArgs, "--config", configPath], {
   stdio: "inherit",
-  shell: process.platform === "win32",
+  shell: executableNeedsShell,
 });
 
 if (result.status === 0 && isDeployCommand) {
   for (const [secretName, secretValue] of Object.entries(authSecrets)) {
     const secretResult = spawnSync(
       executable,
-      ["--config", configPath, "secret", "put", secretName],
+      ["secret", "put", secretName, "--config", configPath],
       {
         input: secretValue,
         stdio: ["pipe", "inherit", "inherit"],
-        shell: process.platform === "win32",
+        shell: executableNeedsShell,
       },
     );
 

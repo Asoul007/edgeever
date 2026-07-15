@@ -35,6 +35,19 @@
 
    如果希望首次登录就使用自定义密码，可改为执行 `EDGE_EVER_PASSWORD='<你的密码>' bun run deploy:setup`。部署成功后也可以在个人中心修改密码。
 
+   Windows PowerShell 请使用以下等价命令，并先完成 Wrangler 登录：
+
+   ```powershell
+   Copy-Item .env.local.example .env.local
+   bun install
+   bunx wrangler login
+   bun run deploy:setup
+   bun run deploy:doctor
+   bun run deploy
+   ```
+
+   PowerShell 中设置自定义首次登录密码时，使用 `$env:EDGE_EVER_PASSWORD='<你的密码>'; bun run deploy:setup`。`.env.local` 只保存在本机，不要上传到 GitHub。
+
 ### 完全手动创建 Cloudflare 资源
 
 如果你不想使用 `deploy:setup` 自动化脚本，也可以完全手动使用 Cloudflare CLI (Wrangler) 创建资源：
