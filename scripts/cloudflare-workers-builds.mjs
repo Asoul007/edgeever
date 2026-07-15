@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { resolveGitHubRepositoryMetadata } from "./github-repository-metadata.mjs";
+
 const command = process.argv[2] ?? "setup";
 const dryRun = process.argv.includes("--dry-run");
 const apiBase = "https://api.cloudflare.com/client/v4";
@@ -193,13 +195,12 @@ const setup = async () => {
     return;
   }
 
-  const github = await fetch(`https://api.github.com/repos/${repository.owner}/${repository.repository}`, {
-    headers: { Accept: "application/vnd.github+json" },
+  const githubRepository = await resolveGitHubRepositoryMetadata({
+    owner: repository.owner,
+    repository: repository.repository,
+    ownerId: value("EDGE_EVER_GITHUB_OWNER_ID"),
+    repositoryId: value("EDGE_EVER_GITHUB_REPOSITORY_ID"),
   });
-  const githubRepository = await github.json().catch(() => ({}));
-  if (!github.ok || !githubRepository.id || !githubRepository.owner?.id) {
-    throw new Error(`Cannot read GitHub repository ${repository.owner}/${repository.repository}. For a private repository, configure an accessible origin or run this command through an authenticated Agent.`);
-  }
 
   const scripts = await request("GET", `/accounts/${accountId}/workers/scripts`);
   const worker = scripts?.find((script) => script.id === workerName);
